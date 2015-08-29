@@ -1,4 +1,4 @@
-package com.github.bluzwang.aop_cache.cache;
+package com.github.bluzwang.aopcache.cache;
 
 import java.util.HashMap;
 import java.util.Map;

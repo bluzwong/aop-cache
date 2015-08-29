@@ -1,4 +1,4 @@
-package com.github.bluzwang.aop_cache.cache;
+package com.github.bluzwang.aopcache.cache;
 
 /**
  * Created by wangzhijie@wind-mobi.com on 2015/8/27.

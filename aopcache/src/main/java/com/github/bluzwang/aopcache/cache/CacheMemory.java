@@ -1,4 +1,4 @@
-package com.github.bluzwang.aop_cache.cache;
+package com.github.bluzwang.aopcache.cache;
 
 
 import java.lang.annotation.ElementType;
@@ -9,8 +9,8 @@ import java.lang.annotation.Target;
 /**
  * Created by wangzhijie@wind-mobi.com on 2015/8/27.
  */
-@Retention(RetentionPolicy.CLASS) // 编译器
-@Target({ ElementType.METHOD }) // 可注解在构造方法 方法上
+@Retention(RetentionPolicy.CLASS)
+@Target({ ElementType.METHOD })
 public @interface CacheMemory {
      String holder() default "";
      long timeOutMs() default 0;

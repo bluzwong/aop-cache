@@ -3,7 +3,7 @@
  *
  * @author Fernando Cejas (the android10 coder)
  */
-package com.github.bluzwang.aop_cache.log;
+package com.github.bluzwang.aopcache.log;
 
 import android.text.TextUtils;
 import android.util.Log;
@@ -20,10 +20,10 @@ import org.aspectj.lang.reflect.MethodSignature;
 public class TraceAspect {
 
     private static final String POINTCUT_METHOD =
-            "execution(@com.github.bluzwang.aop_cache.log.DebugTrace * *(..))";
+            "execution(@com.github.bluzwang.aopcache.log.DebugTrace * *(..))";
 
     private static final String POINTCUT_CONSTRUCTOR =
-            "execution(@com.github.bluzwang.aop_cache.log.DebugTrace *.new(..))";
+            "execution(@com.github.bluzwang.aopcache.log.DebugTrace *.new(..))";
 
     @Pointcut(POINTCUT_METHOD)
     public void methodAnnotatedWithDebugTrace() {
@@ -87,7 +87,7 @@ public class TraceAspect {
         StringBuilder message = new StringBuilder();
         message.append("\nLog\n")
                 .append(TextUtils.isEmpty(className) ? "NO CLASS NAME!" : className)
-                .append("\n ⇢⇢⇢")
+                .append("\n -->")
                 .append(methodName)
                 .append(" (");
         for (int i = 0; i < parameterNames.length; i++) {
@@ -97,7 +97,7 @@ public class TraceAspect {
             }
         }
         message.append(")")
-                .append("\n ⇠⇠⇠")
+                .append("\n <--")
                 .append(methodName)
                 .append(" [")
                 .append(methodDuration)

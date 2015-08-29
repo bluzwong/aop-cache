@@ -2,7 +2,7 @@
  * Copyright (C) 2014 android10.org. All rights reserved.
  * @author Fernando Cejas (the android10 coder)
  */
-package com.github.bluzwang.aop_cache.log;
+package com.github.bluzwang.aopcache.log;
 
 import java.util.concurrent.TimeUnit;
 

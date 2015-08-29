@@ -3,7 +3,7 @@
  *
  * @author Fernando Cejas (the android10 coder)
  */
-package com.github.bluzwang.aop_cache.cache;
+package com.github.bluzwang.aopcache.cache;
 
 import android.util.Log;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -35,16 +35,13 @@ public class CacheMemoryAspect {
 
     private static final Map<String, Block> blocks = new HashMap<String, Block>();
 
-    // 要切入的方法名
     private static final String POINTCUT_METHOD =
-            "execution(@com.github.bluzwang.aop_cache.log.CacheMemory * *(..))";
+            "execution(@com.github.bluzwang.aopcache.cache.CacheMemory * *(..))";
 
-    // 切入该方法
     @Pointcut(POINTCUT_METHOD)
     public void methodAnnotatedWithDebugTrace() {
     }
 
-    // 在切入方法的周围
     @Around("methodAnnotatedWithDebugTrace()")
     public Object weaveJoinPoint(ProceedingJoinPoint joinPoint) throws Throwable {
 
@@ -63,7 +60,7 @@ public class CacheMemoryAspect {
                 .append(methodName)
                 .append("/");
         for (Object arg : joinPoint.getArgs()) {
-            buffer.append((String) arg).append(":");
+            buffer.append(arg.toString()).append(":");
         }
         final String key = buffer.toString();
         final Method method = ((MethodSignature) joinPoint.getSignature()).getMethod();
@@ -93,18 +90,15 @@ public class CacheMemoryAspect {
                         }
                         final Block block = blocks.get(key);
                         if (block.started) {
-                            Log.d(key, "开始请求了 尝试返回备用");
                             Object backUp = repo.getBackUp(key);
                             if (backUp != null) {
                                 return backUp;
                             }
                         } else {
-                            Log.d(key, "还没开始请求进入 block");
                         }
                         final Object[] newResponse = new Object[1];
                         final CountDownLatch latch = new CountDownLatch(1);
                         synchronized (block) {
-                            Log.d(key, "已进入block");
                             block.started = true;
                             Object cachedValueAfterBlock = repo.get(key);
                             if (cachedValueAfterBlock != null) {
@@ -128,7 +122,6 @@ public class CacheMemoryAspect {
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
-                        Log.d(key, "已退出block");
 //                Log.d("bruce", "3 thread = " + Thread.currentThread().getName());
                         Log.d(newResponse[0] + "", " save  cached key:" + key + " value" + newResponse[0]);
                         return newResponse[0];
