@@ -17,7 +17,7 @@ ext {
     siteUrl = 'https://github.com/bluzwong/aop-cache'
     gitUrl = 'https://github.com/bluzwong/aop-cache.git'
 
-    libraryVersion = '0.9.3'
+    libraryVersion = '0.9.4'
 
     developerId = 'bluzwong'
     developerName = 'zj Wong'
@@ -57,6 +57,8 @@ android {
 dependencies {
     compile 'org.aspectj:aspectjrt:1.8.1'
     compile 'io.reactivex:rxjava:1.0.14'
+    compile 'com.google.code.gson:gson:2.3.1'
+    compile 'io.realm:realm-android:0.81.1'
 }
 
 

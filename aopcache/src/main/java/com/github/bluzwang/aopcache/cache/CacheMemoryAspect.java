@@ -39,16 +39,15 @@ public class CacheMemoryAspect {
             "execution(@com.github.bluzwang.aopcache.cache.CacheMemory * *(..))";
 
     @Pointcut(POINTCUT_METHOD)
-    public void methodAnnotatedWithDebugTrace() {
+    public void methodAnnotatedWithCacheMemory() {
     }
 
-    @Around("methodAnnotatedWithDebugTrace()")
+    @Around("methodAnnotatedWithCacheMemory()")
     public Object weaveJoinPoint(ProceedingJoinPoint joinPoint) throws Throwable {
-
         final MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
         Class returnType = methodSignature.getReturnType();
         if (returnType != Observable.class) {
-            Log.w("bruce", "return type is not Observable");
+            //Log.w("bruce", "return type is not Observable");
             Object proceed = joinPoint.proceed();
             return proceed;
         }
