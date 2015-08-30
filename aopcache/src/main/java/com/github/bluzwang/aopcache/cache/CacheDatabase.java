@@ -12,7 +12,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.CLASS)
 @Target({ ElementType.METHOD })
 public @interface CacheDatabase {
-     Class clazz() default String.class;
+     Class gsonClass() default String.class;
      long timeOutMs() default 0;
      long secondTimeOutMs() default 0;
 }

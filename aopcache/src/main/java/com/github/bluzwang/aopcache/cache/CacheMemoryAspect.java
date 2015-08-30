@@ -84,16 +84,20 @@ public class CacheMemoryAspect {
                 .map(new Func1<Object, Object>() {
                     @Override
                     public Object call(Object o) {
-                        if (!blocks.containsKey(key)) {
-                            blocks.put(key, new Block(false));
-                        }
-                        final Block block = blocks.get(key);
-                        if (block.started) {
-                            Object backUp = repo.getBackUp(key);
-                            if (backUp != null) {
-                                return backUp;
+                        final Block block;
+                        synchronized (this) {
+                            if (!blocks.containsKey(key)) {
+                                block = new Block(false);
+                                blocks.put(key, block);
+                            } else {
+                                block = blocks.get(key);
                             }
-                        } else {
+                            if (block.started) {
+                                Object backUp = repo.getBackUp(key);
+                                if (backUp != null) {
+                                    return backUp;
+                                }
+                            }
                         }
                         final Object[] newResponse = new Object[1];
                         final CountDownLatch latch = new CountDownLatch(1);

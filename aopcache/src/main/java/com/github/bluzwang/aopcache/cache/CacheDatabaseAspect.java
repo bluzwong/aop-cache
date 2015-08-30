@@ -59,11 +59,11 @@ public class CacheDatabaseAspect {
         final CacheDatabase cache = method.getAnnotation(CacheDatabase.class);
         final long timeout = cache.timeOutMs();
         final long secondTimeout = cache.secondTimeOutMs();
-        final Class objectClass = cache.clazz();
+        final Class objectClass = cache.gsonClass();
 
         Class returnType = methodSignature.getReturnType();
         if (returnType != Observable.class) {
-            Log.w("bruce", "return clazz is not Observable");
+            Log.w("bruce", "return gsonClass is not Observable");
             Object proceed = joinPoint.proceed();
             return proceed;
         }
@@ -113,9 +113,11 @@ public class CacheDatabaseAspect {
                         final Block block;
                         synchronized (this) {
                             if (!blocks.containsKey(key)) {
-                                blocks.put(key, new Block(false));
+                                block = new Block(false);
+                                blocks.put(key, block);
+                            } else {
+                                block = blocks.get(key);
                             }
-                             block = blocks.get(key);
                         }
                         if (block.started) {
                             Log.d(key, "开始请求了 尝试返回备用");
