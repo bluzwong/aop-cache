@@ -1,1 +1,1 @@
-include ':aopcache'
+include ':aopcache', ':Example'

@@ -3,9 +3,12 @@
  *
  * @author Fernando Cejas (the android10 coder)
  */
-package com.github.bluzwang.aopcache.cache;
+package com.github.bluzwang.aopcache.acache;
 
 import android.util.Log;
+import com.github.bluzwang.aopcache.cache.CacheUtil;
+import com.github.bluzwang.aopcache.cache.DefaultCacheMemoryHolder;
+import com.github.bluzwang.aopcache.cache.ICacheHolder;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -36,7 +39,7 @@ public class CacheMemoryAspect {
     private static final Map<String, Block> blocks = new HashMap<String, Block>();
 
     private static final String POINTCUT_METHOD =
-            "execution(@com.github.bluzwang.aopcache.cache.CacheMemory * *(..))";
+            "execution(@com.github.bluzwang.aopcache.acache.CacheMemory * *(..))";
 
     @Pointcut(POINTCUT_METHOD)
     public void methodAnnotatedWithCacheMemory() {
@@ -44,10 +47,12 @@ public class CacheMemoryAspect {
 
     @Around("methodAnnotatedWithCacheMemory()")
     public Object weaveJoinPoint(ProceedingJoinPoint joinPoint) throws Throwable {
+        Log.d("membruce", "inmem@@@@@@@@@@@@@@@@@@@@@@@@@");
         final MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
         Class returnType = methodSignature.getReturnType();
         if (returnType != Observable.class) {
             //Log.w("bruce", "return type is not Observable");
+            Log.d("membruce", "inmem@@@@@@@@@@@@@@@@@@@@@@@@@ call point");
             Object proceed = joinPoint.proceed();
             return proceed;
         }
@@ -76,6 +81,8 @@ public class CacheMemoryAspect {
             Log.d(className, " return  cached key:" + key + " value" + cachedValue);
             return Observable.just(cachedValue);
         }
+
+        Log.d("membruce", "inmem@@@@@@@@@@@@@@@@@@@@@@@@@ call point2");
         final Observable<Object> obResult = (Observable<Object>) joinPoint.proceed();
         final ICacheHolder repo = tmpRepo;
 //    Log.d("bruce", "1 thread = " + Thread.currentThread().getName());

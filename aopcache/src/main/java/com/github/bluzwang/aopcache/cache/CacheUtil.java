@@ -1,6 +1,7 @@
 package com.github.bluzwang.aopcache.cache;
 
 import android.content.Context;
+import io.paperdb.Paper;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,7 +16,7 @@ public class CacheUtil {
         cacheHolders.put(key, cache);
     }
 
-    static ICacheHolder getCacheHolder(String key) {
+    public static ICacheHolder getCacheHolder(String key) {
         return cacheHolders.get(key);
     }
 
@@ -25,5 +26,6 @@ public class CacheUtil {
 
     public static void setApplicationContext(Context context) {
         sContext = context.getApplicationContext();
+        Paper.init(sContext);
     }
 }

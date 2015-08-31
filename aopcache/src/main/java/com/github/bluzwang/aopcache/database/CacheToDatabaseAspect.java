@@ -1,11 +1,10 @@
-package com.github.bluzwang.aopcache.cache;
+package com.github.bluzwang.aopcache.database;
 
 
 import android.content.Context;
 import android.util.Log;
-import com.google.gson.Gson;
-import io.realm.Realm;
-import io.realm.RealmQuery;
+import com.github.bluzwang.aopcache.cache.CacheUtil;
+import io.paperdb.Paper;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -24,7 +23,7 @@ import java.util.concurrent.CountDownLatch;
  * Aspect representing the cross cutting-concern: Method and Constructor Tracing.
  */
 @Aspect
-public class CacheDatabaseAspect {
+public class CacheToDatabaseAspect {
 
     private final static class Block {
         public Block(boolean started) {
@@ -37,16 +36,17 @@ public class CacheDatabaseAspect {
 
     // 要切入的方法名
     private static final String POINTCUT_METHOD =
-            "execution(@com.github.bluzwang.aopcache.cache.CacheDatabase * *(..))";
+            "execution(@com.github.bluzwang.aopcache.database.CacheToDatabase * *(..))";
 
     // 切入该方法
     @Pointcut(POINTCUT_METHOD)
-    public void methodAnnotatedWithCacheDatabase() {
+    public void methodAnnotatedWithCacheToDatabase() {
     }
 
     // 在切入方法的周围
-    @Around("methodAnnotatedWithCacheDatabase()")
+    @Around("methodAnnotatedWithCacheToDatabase()")
     public Object weaveJoinPoint(ProceedingJoinPoint joinPoint) throws Throwable {
+        Log.d("dbbruce", "in db#############################");
         final Context context = CacheUtil.getApplicationContext();
         if (context == null) {
             Log.d("bruce", " context is not settled ");
@@ -56,10 +56,9 @@ public class CacheDatabaseAspect {
         final Method method = ((MethodSignature) joinPoint.getSignature()).getMethod();
 
 
-        final CacheDatabase cache = method.getAnnotation(CacheDatabase.class);
+        final CacheToDatabase cache = method.getAnnotation(CacheToDatabase.class);
         final long timeout = cache.timeOutMs();
         final long secondTimeout = cache.secondTimeOutMs();
-        final Class objectClass = cache.gsonClass();
 
         Class returnType = methodSignature.getReturnType();
         if (returnType != Observable.class) {
@@ -71,11 +70,11 @@ public class CacheDatabaseAspect {
         final String methodName = methodSignature.getName();
         StringBuilder buffer = new StringBuilder();
         buffer.append(className)
-                .append("/")
+                .append(".")
                 .append(methodName)
-                .append("/");
+                .append(".");
         for (Object arg : joinPoint.getArgs()) {
-            buffer.append(arg.toString()).append(":");
+            buffer.append(arg.toString()).append("-");
         }
         final String key = buffer.toString();
 
@@ -86,29 +85,26 @@ public class CacheDatabaseAspect {
                 .map(new Func1<Object, Object>() {
                     @Override
                     public Object call(Object o) {
-                        Realm realm = Realm.getInstance(context);
-                        RealmQuery<CacheObject> query = realm.where(CacheObject.class);
                         long now = System.currentTimeMillis();
                         Log.d("bruce", now + " is now");
+                        /*Realm realm = Realm.getInstance(context);
+                        RealmQuery<CacheObject> query = realm.where(CacheObject.class);
+
                         query.equalTo("key", key);
                         if (timeout != 0) {
                             query.greaterThan("timeout", now);
+                        }*/
+                        //CacheObject cacheObject = query.findFirst();
+                        CacheObject cacheObject = null;
+                        if (Paper.exist(key)) {
+                            cacheObject = Paper.get(key);
                         }
-                        CacheObject cacheObject = query.findFirst();
-                        if (cacheObject != null) {
-                            if (objectClass == String.class) {
-                                //Log.d("bruce", " type is not defined ");
-                                String value = cacheObject.getValue();
-                                long sub = cacheObject.getTimeout() - now;
-                                Log.d(className, " data base return  cached key:" + key + " value" +  value+ " out time = " + cacheObject.getTimeout() + " sub = " + sub);
-                                realm.close();
-                                return value;
-                            }
-                            Object fromJson = new Gson().fromJson(cacheObject.getValue(), objectClass);
+
+                        if (cacheObject != null && (cacheObject.getTimeout() > now || cacheObject.getTimeout() == 0)) {
                             long sub = cacheObject.getTimeout() - now;
-                            Log.d(className, " data base return  cached key:" + key + " value" + fromJson + " out time = " + cacheObject.getTimeout() + " sub = " + sub);
-                            realm.close();
-                            return fromJson;
+                            Log.d("db/" + className, " data base return  cached key:" + key + " value" + cacheObject.getObject() + " out time = " + cacheObject.getTimeout() + " sub = " + sub);
+                            //realm.close();
+                            return cacheObject.getObject();
                         }
                         final Block block;
                         synchronized (this) {
@@ -121,22 +117,16 @@ public class CacheDatabaseAspect {
                         }
                         if (block.started) {
                             Log.d(key, "开始请求了 尝试返回备用");
-                            RealmQuery<CacheObject> query2 = realm.where(CacheObject.class);
+                            /*RealmQuery<CacheObject> query2 = realm.where(CacheObject.class);
                             query2.equalTo("key", key);
                             if (secondTimeout != 0) {
                                 query2.greaterThan("secondTimeout", now);
-                            }
-                            CacheObject secondCacheObject = query2.findFirst();
-                            if (secondCacheObject != null) {
-                                if (objectClass == String.class) {
-                                    //Log.d("bruce", " type is not defined ");
-                                    String value = secondCacheObject.getValue();
-                                    realm.close();
-                                    return value;
-                                }
-                                Object fromJson = new Gson().fromJson(secondCacheObject.getValue(), objectClass);
-                                realm.close();
-                                return fromJson;
+                            }*/
+//                            CacheObject secondCacheObject = query2.findFirst();
+                            CacheObject secondCacheObject = Paper.get(key);
+                            if (secondCacheObject != null && (secondCacheObject.getTimeout() > now || secondCacheObject.getTimeout() == 0)) {
+                                //realm.close();
+                                return secondCacheObject.getObject();
                             }
                         } else {
                             Log.d(key, "还没开始请求进入 block");
@@ -146,25 +136,26 @@ public class CacheDatabaseAspect {
                         synchronized (block) {
                             Log.d(key, "已进入block");
                             block.started = true;
-                            RealmQuery<CacheObject> query3 = realm.where(CacheObject.class);
+                            //RealmQuery<CacheObject> query3 = realm.where(CacheObject.class);
                             long now2 = System.currentTimeMillis();
-                            query3.equalTo("key", key);
+                            /*query3.equalTo("key", key);
                             if (timeout != 0) {
                                 query3.greaterThan("timeout", now2);
-                            }
-                            CacheObject cacheObject2 = query3.findFirst();
-                            if (cacheObject2 != null) {
-                                if (objectClass == String.class) {
+                            }*/
+//                            CacheObject cacheObject2 = query3.findFirst();
+                            CacheObject cacheObject2 = Paper.get(key);
+                            if (cacheObject2 != null && (cacheObject2.getTimeout() > now || cacheObject2.getTimeout() == 0)) {
+                                /*if (objectClass == String.class) {
                                     //Log.d("bruce", " type is not defined ");
                                     String value = cacheObject2.getValue();
-                                    Log.d(className, "data base after newRequestStarted return cached key:" + key + " value" + value);
-                                    realm.close();
+                                    Log.d("db/" + className, "data base after newRequestStarted return cached key:" + key + " value" + value);
+                                   // realm.close();
                                     return value;
-                                }
-                                Object fromJson = new Gson().fromJson(cacheObject2.getValue(), objectClass);
-                                Log.d(fromJson + "", " data base after newRequestStarted return cached key:" + key + " value" + fromJson);
-                                realm.close();
-                                return fromJson;
+                                }*/
+                                //Object fromJson = new Gson().fromJson(cacheObject2.getValue(), objectClass);
+                                //Log.d(fromJson + "", " data base after newRequestStarted return cached key:" + key + " value" + fromJson);
+                                //realm.close();
+                                return cacheObject2.getObject();
                             }
                             obResult.subscribe(new Action1<Object>() {
                                 @Override
@@ -173,24 +164,15 @@ public class CacheDatabaseAspect {
                                     newResponse[0] = o;
                                     long now = System.currentTimeMillis();
 
-                                    Realm realm = Realm.getInstance(context);
-                                    realm.beginTransaction();
-                                    CacheObject responseObject = realm.where(CacheObject.class).equalTo("key", key).findFirst();
-                                    if (responseObject == null) {
-                                        responseObject = realm.createObject(CacheObject.class);
-                                        responseObject.setKey(key);
-                                    }
-                                    responseObject.setTimeout(timeout == 0? Long.MAX_VALUE: now + timeout);
-                                    responseObject.setSecondTimeout(secondTimeout == 0? Long.MAX_VALUE: now + secondTimeout);
-                                    String valueToSave;
-                                    if (objectClass == String.class) {
-                                        valueToSave = o.toString();
-                                    } else {
-                                        valueToSave = new Gson().toJson(o);
-                                    }
-                                    responseObject.setValue(valueToSave);
-
-                                    realm.commitTransaction();
+                                    /*Realm realm = Realm.getInstance(context);
+                                    realm.beginTransaction();*/
+//                                    CacheObject responseObject = realm.where(CacheObject.class).equalTo("key", key).findFirst();
+                                    CacheObject responseObject = new CacheObject();
+                                    responseObject.setTimeout(timeout == 0 ? Long.MAX_VALUE : now + timeout);
+                                    responseObject.setSecondTimeout(secondTimeout == 0 ? Long.MAX_VALUE : now + secondTimeout);
+                                    responseObject.setObject(o);
+                                    Paper.put(key, responseObject);
+                                    //realm.commitTransaction();
                                     block.started = false;
                                     Log.d(o + "", "put ok ");
                                     latch.countDown();
@@ -205,7 +187,7 @@ public class CacheDatabaseAspect {
                         Log.d(key, "已退出block");
 //                Log.d("bruce", "3 thread = " + Thread.currentThread().getName());
                         Log.d(newResponse[0] + "", " data base save  cached key:" + key + " value" + newResponse[0]);
-                        realm.close();
+                        //realm.close();
                         return newResponse[0];
                     }
                 });
