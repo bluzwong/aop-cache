@@ -7,4 +7,5 @@ public interface ICacheHolder {
     void put(String key, Object value, long timeOutMs, long timeOutReturnInMs);
     Object get(String key);
     Object getBackUp(String key);
+     long getTimeOut(String key);
 }

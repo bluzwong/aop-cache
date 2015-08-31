@@ -35,7 +35,7 @@ public class TraceAspect {
 
     @Around("methodAnnotatedWithDebugTrace() || constructorAnnotatedDebugTrace()")
     public Object weaveJoinPoint(ProceedingJoinPoint joinPoint) throws Throwable {
-
+        Log.d("debugbruce", "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% in debug ");
         MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
 
         DebugTrace trace = methodSignature.getMethod().getAnnotation(DebugTrace.class);

@@ -13,37 +13,30 @@ public enum DefaultCacheMemoryHolder implements ICacheHolder {
     public final Map<String, Long> timeOutReturnInMap = new HashMap<String, Long>();
 
     @Override
-    public synchronized void put(String key, Object value, long timeOutMs, long timeOutReturnInMs) {
+    public void put(String key, Object value, long timeOutMs, long timeOutReturnInMs) {
         map.put(key, value);
-        long now = System.currentTimeMillis();
-        if (timeOutMs > 0) {
-            timeOutMap.put(key, now + timeOutMs);
-        }
-        if (timeOutReturnInMs > 0) {
-            timeOutReturnInMap.put(key, now + timeOutReturnInMs);
-        }
+        timeOutMap.put(key, timeOutMs);
     }
 
-    public synchronized Object get(String key) {
+    public Object get(String key) {
         if (!map.containsKey(key)) {
             return null;
         }
-        if (!timeOutMap.containsKey(key)) {
-            return map.get(key);
-        }
-        long outTime = timeOutMap.get(key);
-        long current = System.currentTimeMillis();
-        long t = current - outTime;
-        if (t <= 0) {
-            return map.get(key);
-        }
+        return map.get(key);
         /*map.remove(key);
         timeOutMap.remove(key);*/
-        return null;
+    }
+    public long getTimeOut(String key) {
+        if (!timeOutMap.containsKey(key)) {
+            return 0;
+        }
+        return timeOutMap.get(key);
+        /*map.remove(key);
+        timeOutMap.remove(key);*/
     }
 
     @Override
-    public synchronized Object getBackUp(String key) {
+    public Object getBackUp(String key) {
         if (!timeOutReturnInMap.containsKey(key)) {
             return null;
         }

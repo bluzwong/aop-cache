@@ -16,7 +16,7 @@ public class CacheUtil {
         cacheHolders.put(key, cache);
     }
 
-    public static ICacheHolder getCacheHolder(String key) {
+    static ICacheHolder getCacheHolder(String key) {
         return cacheHolders.get(key);
     }
 
