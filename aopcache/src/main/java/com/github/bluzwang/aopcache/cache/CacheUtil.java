@@ -1,6 +1,7 @@
 package com.github.bluzwang.aopcache.cache;
 
 import android.content.Context;
+import android.util.Log;
 import io.paperdb.Paper;
 
 import java.util.HashMap;
@@ -29,5 +30,13 @@ public class CacheUtil {
 
     public static void setNeedLog(boolean needLog) {
         sNeedLog = needLog;
+    }
+
+    public static void clearMemoryCache() {
+        DefaultCacheMemoryHolder holder = DefaultCacheMemoryHolder.INSTANCE;
+        int size =holder.map.size();
+        holder.map.clear();
+        holder.timeOutMap.clear();
+        Log.d("aop-cache", "memory cache has been cleared size = " + size);
     }
 }

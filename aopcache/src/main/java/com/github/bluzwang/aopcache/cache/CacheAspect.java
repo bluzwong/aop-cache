@@ -31,6 +31,7 @@ public class CacheAspect {
         public Block(boolean started) {
             this.started = started;
         }
+
         public boolean started = false;
     }
 
@@ -44,18 +45,30 @@ public class CacheAspect {
     }
 
 
-    private void aopLog(String msg) {
+    public static void aopLog(String msg, long startTime) {
         if (CacheUtil.isNeedLog()) {
-            Log.d("aop-cache", msg);
+            if (startTime > 0) {
+                long t = System.currentTimeMillis() - startTime;
+                msg = "[" + t + "ms] " + msg;
+                Log.i("aop-cache", msg);
+            } else {
+                Log.d("aop-cache", msg);
+            }
         }
     }
-    private void aopWarn(String msg) {
+    public static void aopLog(String msg) {
+        aopLog(msg, -1);
+    }
+
+    public static void aopWarn(String msg) {
         if (CacheUtil.isNeedLog()) {
             Log.w("aop-cache", msg);
         }
     }
+
     @Around("methodAnnotatedWithCache()")
     public Object weaveJoinPoint(ProceedingJoinPoint joinPoint) throws Throwable {
+        final long startTime = System.currentTimeMillis();
         final MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
         Class returnType = methodSignature.getReturnType();
         if (returnType != Observable.class) {
@@ -95,7 +108,7 @@ public class CacheAspect {
         final Object cachedValue = repo.get(key);
         if (cachedValue != null && needMemCache) {
             if (repo.getTimeOut(key) > System.currentTimeMillis() || repo.getTimeOut(key) <= 0) {
-                aopLog(" hit in memory cache key:" + key + "  so return object:" + cachedValue);
+                aopLog(" hit in memory cache key:" + key + "  so return object:" + cachedValue, startTime);
                 return Observable.just(cachedValue);
             } else {
                 aopLog(" key:" + key + " in memory is out of time");
@@ -118,12 +131,12 @@ public class CacheAspect {
                                     repo.put(key, objFromDb, cacheObject.getTimeout(), 0);
                                     aopLog(" hit in database cache key:" + key + "  so save to memory object:" + cacheObject.getObject());
                                 }
-                                aopLog(" hit in database cache key:" + key + "  so return object:" + cacheObject.getObject());
+                                aopLog(" hit in database cache key:" + key + "  so return object:" + cacheObject.getObject(), startTime);
                                 return objFromDb;
                             } else {
                                 aopLog(" key:" + key + " in database is out of time");
                             }
-                        } else if(!Paper.exist(key)) {
+                        } else if (!Paper.exist(key)) {
                             aopLog(" key:" + key + " in database is missed");
                         }
                         final Block block;
@@ -141,7 +154,7 @@ public class CacheAspect {
                             Object cachedValueAfterBlock = repo.get(key);
                             if (needMemCache && cachedValueAfterBlock != null) {
                                 if (repo.getTimeOut(key) > now) {
-                                    aopLog(" hit in blocked memory cache key:" + key + "  so return object:" + cachedValueAfterBlock);
+                                    aopLog(" hit in blocked memory cache key:" + key + "  so return object:" + cachedValueAfterBlock, startTime);
                                     return cachedValueAfterBlock;
                                 }
                                 //Log.d(cachedValueAfterBlock + "", " after newRequestStarted return cached key:" + key + " value" + cachedValueAfterBlock);
@@ -149,7 +162,7 @@ public class CacheAspect {
                             if (needDbCache && Paper.exist(key)) {
                                 CacheObject cacheObject = Paper.get(key);
                                 if (cacheObject.getTimeout() > now) {
-                                    aopLog(" hit in blocked database cache key:" + key + "  so return object:" + cachedValueAfterBlock);
+                                    aopLog(" hit in blocked database cache key:" + key + "  so return object:" + cachedValueAfterBlock, startTime);
                                     return cacheObject.getObject();
                                 }
                             }
@@ -160,13 +173,13 @@ public class CacheAspect {
 //                      Log.d("bruce", "2 thread = " + Thread.currentThread().getName());
                                     newResponse[0] = o;
                                     if (needMemCache) {
-                                        repo.put(key, o, memTimeOut  > 0 ?memTimeOut + System.currentTimeMillis(): Long.MAX_VALUE, 0);
+                                        repo.put(key, o, memTimeOut > 0 ? memTimeOut + System.currentTimeMillis() : Long.MAX_VALUE, 0);
                                         aopLog(" got new object save to memory cache key:" + key + "  object:" + o);
                                     }
                                     if (needDbCache) {
                                         CacheObject cacheObject = new CacheObject();
                                         cacheObject.setObject(o);
-                                        cacheObject.setTimeout(dbTimeOut > 0 ?dbTimeOut + System.currentTimeMillis(): Long.MAX_VALUE);
+                                        cacheObject.setTimeout(dbTimeOut > 0 ? dbTimeOut + System.currentTimeMillis() : Long.MAX_VALUE);
                                         Paper.put(key, cacheObject);
                                         aopLog(" got new object save to database cache key:" + key + "  object:" + o);
                                     }
@@ -180,7 +193,7 @@ public class CacheAspect {
                             e.printStackTrace();
                         }
 //                Log.d("bruce", "3 thread = " + Thread.currentThread().getName());
-                        aopLog(" got new object return it: " + key + " object:" + newResponse[0]);
+                        aopLog(" got new object return it: " + key + " object:" + newResponse[0], startTime);
                         return newResponse[0];
                     }
                 });

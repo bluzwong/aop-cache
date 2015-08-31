@@ -7,11 +7,13 @@ package com.github.bluzwang.aopcache.log;
 
 import android.text.TextUtils;
 import android.util.Log;
+import com.github.bluzwang.aopcache.cache.CacheAspect;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
+import rx.Observable;
 
 /**
  * Aspect representing the cross cutting-concern: Method and Constructor Tracing.
@@ -35,9 +37,12 @@ public class TraceAspect {
 
     @Around("methodAnnotatedWithDebugTrace() || constructorAnnotatedDebugTrace()")
     public Object weaveJoinPoint(ProceedingJoinPoint joinPoint) throws Throwable {
-        Log.d("debugbruce", "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% in debug ");
         MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
-
+        Class returnType = methodSignature.getReturnType();
+        if (returnType != Observable.class) {
+            CacheAspect.aopWarn("!!! return type must be Observable<>, do not know about it? Google rxjava!");
+            return joinPoint.proceed();
+        }
         DebugTrace trace = methodSignature.getMethod().getAnnotation(DebugTrace.class);
         if (!trace.enable()) {
             return joinPoint.proceed();
@@ -52,7 +57,6 @@ public class TraceAspect {
 
         String[] parameterNames = methodSignature.getParameterNames();
         Object[] args = joinPoint.getArgs();
-        Class returnType = methodSignature.getReturnType();
         String msg = buildLogMessage(className, methodName, stopWatch.getTotalTimeMillis(), parameterNames, args, returnType, result);
         switch (trace.level()) {
             case 1:

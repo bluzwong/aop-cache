@@ -8,7 +8,6 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import com.github.bluzwang.aopcache.cache.Cache;
 import com.github.bluzwang.aopcache.cache.CacheUtil;
-import com.github.bluzwang.aopcache.log.DebugTrace;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
@@ -19,17 +18,14 @@ import java.util.Random;
 
 
 public class MainActivity extends Activity {
-
     TextView tv;
     ScrollView sv;
-
 
     /**
      * 被@Cache注解的Observable方法 会自动进行缓存
      * @param i
      * @return
      */
-    @DebugTrace
     @Cache(memTimeOutMs = 5000, dbTimeOutMs = 6000) // 超时单位毫秒 设置0或者不设置为永久
     private Observable<String> getResult(int i) {
         return Observable.just(i)
@@ -87,5 +83,11 @@ public class MainActivity extends Activity {
                         });
             }
         });
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        CacheUtil.clearMemoryCache();
     }
 }
