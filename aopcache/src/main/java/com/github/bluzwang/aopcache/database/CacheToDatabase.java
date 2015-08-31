@@ -1,4 +1,4 @@
-package com.github.bluzwang.aopcache.cache;
+package com.github.bluzwang.aopcache.database;
 
 
 import java.lang.annotation.ElementType;
@@ -11,8 +11,7 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.CLASS)
 @Target({ ElementType.METHOD })
-public @interface CacheMemory {
-     String holder() default "";
+public @interface CacheToDatabase {
      long timeOutMs() default 0;
      long secondTimeOutMs() default 0;
 }

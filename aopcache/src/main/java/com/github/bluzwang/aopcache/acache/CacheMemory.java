@@ -1,4 +1,4 @@
-package com.github.bluzwang.aopcache.cache;
+package com.github.bluzwang.aopcache.acache;
 
 
 import java.lang.annotation.ElementType;
@@ -11,8 +11,8 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.CLASS)
 @Target({ ElementType.METHOD })
-public @interface CacheDatabase {
-     Class gsonClass() default String.class;
+public @interface CacheMemory {
+     String holder() default "";
      long timeOutMs() default 0;
      long secondTimeOutMs() default 0;
 }
