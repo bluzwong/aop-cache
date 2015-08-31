@@ -1,14 +1,10 @@
 package com.github.bluzwang.aopcache.cache;
 
-import io.realm.RealmObject;
-import io.realm.annotations.PrimaryKey;
 
 /**
  * Created by Bruce-Home on 2015/8/30.
  */
 public class CacheObject {
-
-
 
     private Object object;
 

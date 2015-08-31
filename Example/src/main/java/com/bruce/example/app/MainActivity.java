@@ -7,7 +7,6 @@ import android.view.View;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import com.github.bluzwang.aopcache.cache.Cache;
-import com.github.bluzwang.aopcache.cache.CacheMemory;
 import com.github.bluzwang.aopcache.cache.CacheUtil;
 import com.github.bluzwang.aopcache.log.DebugTrace;
 import rx.Observable;
@@ -24,8 +23,14 @@ public class MainActivity extends Activity {
     TextView tv;
     ScrollView sv;
 
+
+    /**
+     * 被@Cache注解的Observable方法 会自动进行缓存
+     * @param i
+     * @return
+     */
     @DebugTrace
-    @Cache(memTimeOutMs = 5000, dbTimeOutMs = 6000)
+    @Cache(memTimeOutMs = 5000, dbTimeOutMs = 6000) // 超时单位毫秒 设置0或者不设置为永久
     private Observable<String> getResult(int i) {
         return Observable.just(i)
                 .map(new Func1<Integer, String>() {
@@ -48,10 +53,14 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // 需要保存到数据库则要注入context
         CacheUtil.setApplicationContext(this.getApplicationContext());
+        CacheUtil.setNeedLog(true);
+
         setContentView(R.layout.activity_main);
         tv = (TextView) findViewById(R.id.tv);
         sv = (ScrollView) findViewById(R.id.sv);
+
         final Random random = new Random();
         findViewById(R.id.btn).setOnClickListener(new View.OnClickListener() {
             @Override

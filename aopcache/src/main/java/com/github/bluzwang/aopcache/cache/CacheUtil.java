@@ -11,14 +11,6 @@ import java.util.Map;
  */
 public class CacheUtil {
     private static Context sContext;
-    private static Map<String, ICacheHolder> cacheHolders = new HashMap<String, ICacheHolder>();
-    public static void addCacheHolder(String key, ICacheHolder cache) {
-        cacheHolders.put(key, cache);
-    }
-
-    static ICacheHolder getCacheHolder(String key) {
-        return cacheHolders.get(key);
-    }
 
     public static Context getApplicationContext() {
         return sContext;
@@ -27,5 +19,15 @@ public class CacheUtil {
     public static void setApplicationContext(Context context) {
         sContext = context.getApplicationContext();
         Paper.init(sContext);
+    }
+
+    private static boolean sNeedLog = false;
+
+    public static boolean isNeedLog() {
+        return sNeedLog;
+    }
+
+    public static void setNeedLog(boolean needLog) {
+        sNeedLog = needLog;
     }
 }
