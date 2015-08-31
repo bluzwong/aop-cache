@@ -1,8 +1,8 @@
 # aop-cache
- aop-cache is a light weight [easy-using](#benchmark-results) cache library for android with [rxjava](https://github.com/ReactiveX/RxJava).
+ aop-cache is a light weight cache library for android with [rxjava](https://github.com/ReactiveX/RxJava).
  Just add ONE LINE to make cache.
 #### Usage
----
+------
  add @Cache to the function that returns Observable<>.
 ```java
 @Cache(memTimeOutMs = 5000, dbTimeOutMs = 10000, logLevel = 1)
@@ -60,14 +60,14 @@ findViewById(R.id.btn).setOnClickListener(new View.OnClickListener() {
 ![1](./Example/src/main/res/mipmap-hdpi/pic.jpg)
 ![2](./Example/src/main/res/mipmap-hdpi/pic2.png)
 #### Add dependency
------
+------
 ```groovy
 repositories {
     jcenter()
 }
 dependencies {
     ...
-    compile 'com.github.bluzwang:aopcache:0.9.5'
+    compile 'com.github.bluzwang:aopcache:0.9.6'
     compile 'org.aspectj:aspectjrt:1.8.1'
 }
 ```
