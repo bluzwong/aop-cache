@@ -22,35 +22,12 @@ public class MainActivity extends Activity {
     TextView tv;
     ScrollView sv;
 
-    /**
-     * 被@Cache注解的Observable方法 会自动进行缓存
-     * @param i
-     * @return
-     */
-    @Cache(memTimeOutMs = 5000, dbTimeOutMs = 6000, logLevel = 1) // 超时单位毫秒 设置0或者不设置为永久
-    private Observable<String> getResult(int i) {
-        return Observable.just(i)
-                .map(new Func1<Integer, String>() {
-                    @Override
-                    public String call(Integer integer) {
-                        StringBuffer buffer = new StringBuffer();
-                        try {
-                            Thread.sleep(2222);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                        for (int j = 0; j < 10; j++) {
-                            buffer.append(integer);
-                        }
-                        return buffer.toString();
-                    }
-                });
-    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // 需要保存到数据库则要注入context
+        // set context to use database cache
         CacheUtil.setApplicationContext(this.getApplicationContext());
         CacheUtil.setNeedLog(true);
 
@@ -87,9 +64,35 @@ public class MainActivity extends Activity {
         });
     }
 
+    /**
+     * 被@Cache注解的Observable方法 会自动进行缓存
+     * @param i
+     * @return
+     */
+    @Cache(memTimeOutMs = 5000, dbTimeOutMs = 10000, logLevel = 1)
+    private Observable<String> getResult(int i) {
+        return Observable.just(i)
+                .map(new Func1<Integer, String>() {
+                    @Override
+                    public String call(Integer integer) {
+                        StringBuffer buffer = new StringBuffer();
+                        try {
+                            Thread.sleep(2222);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        for (int j = 0; j < 10; j++) {
+                            buffer.append(integer);
+                        }
+                        return buffer.toString();
+                    }
+                });
+    }
+
     @Override
     protected void onPause() {
         super.onPause();
+        // clear memory cache
         CacheUtil.clearMemoryCache();
     }
 }
