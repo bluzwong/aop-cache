@@ -8,6 +8,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import com.github.bluzwang.aopcache.cache.Cache;
 import com.github.bluzwang.aopcache.cache.CacheUtil;
+import com.github.bluzwang.aopcache.log.DebugTrace;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
@@ -26,7 +27,7 @@ public class MainActivity extends Activity {
      * @param i
      * @return
      */
-    @Cache(memTimeOutMs = 5000, dbTimeOutMs = 6000) // 超时单位毫秒 设置0或者不设置为永久
+    @Cache(memTimeOutMs = 5000, dbTimeOutMs = 6000, logLevel = 1) // 超时单位毫秒 设置0或者不设置为永久
     private Observable<String> getResult(int i) {
         return Observable.just(i)
                 .map(new Func1<Integer, String>() {
@@ -67,6 +68,7 @@ public class MainActivity extends Activity {
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(new Action1<String>() {
+                            @DebugTrace
                             @Override
                             public void call(String s) {
                                 long usingTime = System.currentTimeMillis() - startTime;

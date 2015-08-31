@@ -77,6 +77,7 @@ public class CacheAspect {
         }
         final Method method = ((MethodSignature) joinPoint.getSignature()).getMethod();
         Cache cache = method.getAnnotation(Cache.class);
+        final int level = cache.logLevel();
         final boolean needMemCache = cache.needMemCache();
         boolean tmpNeedDbCache = cache.needDbCache();
         if (!tmpNeedDbCache && !needMemCache) {
@@ -108,7 +109,7 @@ public class CacheAspect {
         final Object cachedValue = repo.get(key);
         if (cachedValue != null && needMemCache) {
             if (repo.getTimeOut(key) > System.currentTimeMillis() || repo.getTimeOut(key) <= 0) {
-                aopLog(" hit in memory cache key:" + key + "  so return object:" + cachedValue, startTime);
+                aopLog(" hit in memory cache key:" + key + ((level > 0)? "": "  so return object:" + cachedValue), startTime);
                 return Observable.just(cachedValue);
             } else {
                 aopLog(" key:" + key + " in memory is out of time");
@@ -129,9 +130,9 @@ public class CacheAspect {
                                 Object objFromDb = cacheObject.getObject();
                                 if (needMemCache) {
                                     repo.put(key, objFromDb, cacheObject.getTimeout(), 0);
-                                    aopLog(" hit in database cache key:" + key + "  so save to memory object:" + cacheObject.getObject());
+                                    aopLog(" hit in database cache key:" + key + ((level > 0)? "": "  so save to memory object:" + cacheObject.getObject()));
                                 }
-                                aopLog(" hit in database cache key:" + key + "  so return object:" + cacheObject.getObject(), startTime);
+                                aopLog(" hit in database cache key:" + key + ((level > 0)? "": "  so return object:" + cacheObject.getObject()), startTime);
                                 return objFromDb;
                             } else {
                                 aopLog(" key:" + key + " in database is out of time");
@@ -154,7 +155,7 @@ public class CacheAspect {
                             Object cachedValueAfterBlock = repo.get(key);
                             if (needMemCache && cachedValueAfterBlock != null) {
                                 if (repo.getTimeOut(key) > now) {
-                                    aopLog(" hit in blocked memory cache key:" + key + "  so return object:" + cachedValueAfterBlock, startTime);
+                                    aopLog(" hit in blocked memory cache key:" + key +((level > 0)? "":  "  so return object:" + cachedValueAfterBlock), startTime);
                                     return cachedValueAfterBlock;
                                 }
                                 //Log.d(cachedValueAfterBlock + "", " after newRequestStarted return cached key:" + key + " value" + cachedValueAfterBlock);
@@ -162,7 +163,7 @@ public class CacheAspect {
                             if (needDbCache && Paper.exist(key)) {
                                 CacheObject cacheObject = Paper.get(key);
                                 if (cacheObject.getTimeout() > now) {
-                                    aopLog(" hit in blocked database cache key:" + key + "  so return object:" + cachedValueAfterBlock, startTime);
+                                    aopLog(" hit in blocked database cache key:" + key +((level > 0)? "":  "  so return object:" + cachedValueAfterBlock), startTime);
                                     return cacheObject.getObject();
                                 }
                             }
@@ -174,14 +175,14 @@ public class CacheAspect {
                                     newResponse[0] = o;
                                     if (needMemCache) {
                                         repo.put(key, o, memTimeOut > 0 ? memTimeOut + System.currentTimeMillis() : Long.MAX_VALUE, 0);
-                                        aopLog(" got new object save to memory cache key:" + key + "  object:" + o);
+                                        aopLog(" got new object save to memory cache key:" + key +((level > 0)? "":  "  object:" + o));
                                     }
                                     if (needDbCache) {
                                         CacheObject cacheObject = new CacheObject();
                                         cacheObject.setObject(o);
                                         cacheObject.setTimeout(dbTimeOut > 0 ? dbTimeOut + System.currentTimeMillis() : Long.MAX_VALUE);
                                         Paper.put(key, cacheObject);
-                                        aopLog(" got new object save to database cache key:" + key + "  object:" + o);
+                                        aopLog(" got new object save to database cache key:" + key +((level > 0)? "":  "  object:" + o));
                                     }
                                     latch.countDown();
                                 }
@@ -193,7 +194,7 @@ public class CacheAspect {
                             e.printStackTrace();
                         }
 //                Log.d("bruce", "3 thread = " + Thread.currentThread().getName());
-                        aopLog(" got new object return it: " + key + " object:" + newResponse[0], startTime);
+                        aopLog(" got new object return it: " + key +((level > 0)? "":  " object:" + newResponse[0]), startTime);
                         return newResponse[0];
                     }
                 });

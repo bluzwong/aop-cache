@@ -39,10 +39,6 @@ public class TraceAspect {
     public Object weaveJoinPoint(ProceedingJoinPoint joinPoint) throws Throwable {
         MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
         Class returnType = methodSignature.getReturnType();
-        if (returnType != Observable.class) {
-            CacheAspect.aopWarn("!!! return type must be Observable<>, do not know about it? Google rxjava!");
-            return joinPoint.proceed();
-        }
         DebugTrace trace = methodSignature.getMethod().getAnnotation(DebugTrace.class);
         if (!trace.enable()) {
             return joinPoint.proceed();

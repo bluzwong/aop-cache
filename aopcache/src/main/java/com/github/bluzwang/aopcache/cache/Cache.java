@@ -19,4 +19,11 @@ public @interface Cache {
      boolean needDbCache() default true;
      long dbTimeOutMs() default 0;
      //long dbSecondTimeOutMs() default 0;
+
+     /**
+      * 0 full
+      * 1 simple info
+      * @return
+      */
+     int logLevel() default 0;
 }
