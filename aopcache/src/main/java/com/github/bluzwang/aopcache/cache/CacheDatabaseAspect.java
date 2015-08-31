@@ -47,6 +47,8 @@ public class CacheDatabaseAspect {
     // 在切入方法的周围
     @Around("methodAnnotatedWithCacheDatabase()")
     public Object weaveJoinPoint(ProceedingJoinPoint joinPoint) throws Throwable {
+
+        Log.d("dbbruce", "################################# in database ");
         final Context context = CacheUtil.getApplicationContext();
         if (context == null) {
             Log.d("bruce", " context is not settled ");

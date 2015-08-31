@@ -44,6 +44,8 @@ public class CacheMemoryAspect {
 
     @Around("methodAnnotatedWithCacheMemory()")
     public Object weaveJoinPoint(ProceedingJoinPoint joinPoint) throws Throwable {
+
+        Log.d("membruce", "@@@@@@@@@@@@@@@@@@@@@@@@@ in mem ");
         final MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
         Class returnType = methodSignature.getReturnType();
         if (returnType != Observable.class) {
