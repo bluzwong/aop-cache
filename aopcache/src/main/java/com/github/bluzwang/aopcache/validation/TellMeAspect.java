@@ -65,23 +65,23 @@ public class TellMeAspect {
                 arg = args[valiedatefield.whenParamIndex()[i]];
                 fieldName = names[valiedatefield.whenParamIndex()[i]];
 
-            if (valiedatefield.notNull().length > i && valiedatefield.notNull()[i]) { // 判断参数是否为空
+            if (valiedatefield.notNull().length > i && valiedatefield.notNull()[i]) {
                 if (arg == null)
                     errors.add( fieldName + " is null");
-            } else { // 如果该参数能够为空，并且当参数为空时，就不用判断后面的了 ，直接返回true
+            } else {
                 if (arg == null)
                     continue;
 //                    return null
             }
-            if (valiedatefield.maxVal().length > i && valiedatefield.maxVal()[i] != -1) { // 判断数值最大值
+            if (valiedatefield.maxVal().length > i && valiedatefield.maxVal()[i] != -1) {
                 if ((Integer) arg > valiedatefield.maxVal()[i])
                     errors.add(fieldName + " is: " + arg + " bigger than maxVal: " + valiedatefield.maxVal()[i]);
             }
-            if (valiedatefield.minVal().length > i && valiedatefield.minVal()[i] != -1) { // 判断数值最小值
+            if (valiedatefield.minVal().length > i && valiedatefield.minVal()[i] != -1) {
                 if ((Integer) arg < valiedatefield.minVal()[i])
                     errors.add( fieldName + " is: " + arg + " less than minVal: " + valiedatefield.minVal()[i]);
             }
-            if (valiedatefield.regStr().length > i && !"".equals(valiedatefield.regStr()[i])) { // 判断正则
+            if (valiedatefield.regStr().length > i && !"".equals(valiedatefield.regStr()[i])) {
                 if (arg instanceof String) {
                     if (!((String) arg).matches(valiedatefield.regStr()[i]))
                         errors.add( fieldName + " is: " + arg + " not match reg: " + valiedatefield.regStr()[i]);

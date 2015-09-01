@@ -8,6 +8,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import com.github.bluzwang.aopcache.cache.Cache;
 import com.github.bluzwang.aopcache.cache.CacheUtil;
+import com.github.bluzwang.aopcache.cache.Ignore;
 import com.github.bluzwang.aopcache.log.DebugTraceRx;
 import com.github.bluzwang.aopcache.validation.TellMeIfError;
 import rx.Observable;
@@ -70,7 +71,7 @@ public class MainActivity extends Activity {
     @Cache(memTimeOutMs = 5000, dbTimeOutMs = 10000, logLevel = 1)
     @DebugTraceRx
     @TellMeIfError(whenParamIndex = {0, 1}, maxVal = {2, 1}, minVal = {-1, 1})
-    private Observable<String> getResult(int i, int i2) {
+    private Observable<String> getResult(int i, @Ignore int i2) {
         return Observable.just(i)
                 .map(new Func1<Integer, String>() {
                     @Override
@@ -93,6 +94,6 @@ public class MainActivity extends Activity {
     protected void onPause() {
         super.onPause();
         // clear memory cache
-        CacheUtil.clearMemoryCache();
+        CacheUtil.clearAllMemoryCache();
     }
 }

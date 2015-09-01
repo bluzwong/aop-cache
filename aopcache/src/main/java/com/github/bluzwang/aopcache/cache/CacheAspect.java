@@ -16,6 +16,7 @@ import rx.Observable;
 import rx.functions.Action1;
 import rx.functions.Func1;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
@@ -100,8 +101,20 @@ public class CacheAspect {
                 .append(".")
                 .append(methodName)
                 .append(".");
-        for (Object arg : joinPoint.getArgs()) {
-            buffer.append(arg.toString()).append("-");
+        Object[] args = joinPoint.getArgs();
+        Annotation[][] paramsAnnotations = method.getParameterAnnotations();
+        for (int i = 0; i < args.length; i++) {
+            boolean isIgnored = false;
+            for (Annotation annotation : paramsAnnotations[i]) {
+                if (annotation.annotationType() == Ignore.class) {
+                    isIgnored = true;
+                }
+            }
+            if (!isIgnored) {
+                Object arg = args[i];
+                buffer.append(arg.toString());
+            }
+            buffer.append("-");
         }
         final String key = buffer.toString();
         // final long dbSecondTimeOut = cache.dbSecondTimeOutMs();
