@@ -8,8 +8,8 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import com.github.bluzwang.aopcache.cache.Cache;
 import com.github.bluzwang.aopcache.cache.CacheUtil;
-import com.github.bluzwang.aopcache.log.DebugTrace;
 import com.github.bluzwang.aopcache.log.DebugTraceRx;
+import com.github.bluzwang.aopcache.validation.TellMeIfError;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
@@ -22,8 +22,6 @@ import java.util.Random;
 public class MainActivity extends Activity {
     TextView tv;
     ScrollView sv;
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,7 +40,7 @@ public class MainActivity extends Activity {
             public void onClick(View view) {
                 int nextInt = random.nextInt(5);
                 final long startTime = System.currentTimeMillis();
-                getResult(nextInt)
+                getResult(nextInt, nextInt)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(new Action1<String>() {
@@ -71,7 +69,8 @@ public class MainActivity extends Activity {
      */
     @Cache(memTimeOutMs = 5000, dbTimeOutMs = 10000, logLevel = 1)
     @DebugTraceRx
-    private Observable<String> getResult(int i) {
+    @TellMeIfError(whenParamIndex = {0, 1}, maxVal = {2, 1}, minVal = {-1, 1})
+    private Observable<String> getResult(int i, int i2) {
         return Observable.just(i)
                 .map(new Func1<Integer, String>() {
                     @Override
