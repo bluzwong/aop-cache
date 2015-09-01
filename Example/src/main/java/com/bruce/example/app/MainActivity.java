@@ -9,6 +9,7 @@ import android.widget.TextView;
 import com.github.bluzwang.aopcache.cache.Cache;
 import com.github.bluzwang.aopcache.cache.CacheUtil;
 import com.github.bluzwang.aopcache.log.DebugTrace;
+import com.github.bluzwang.aopcache.log.DebugTraceRx;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
@@ -45,7 +46,6 @@ public class MainActivity extends Activity {
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(new Action1<String>() {
-                            @DebugTrace
                             @Override
                             public void call(String s) {
                                 long usingTime = System.currentTimeMillis() - startTime;
@@ -70,6 +70,7 @@ public class MainActivity extends Activity {
      * @return
      */
     @Cache(memTimeOutMs = 5000, dbTimeOutMs = 10000, logLevel = 1)
+    @DebugTraceRx
     private Observable<String> getResult(int i) {
         return Observable.just(i)
                 .map(new Func1<Integer, String>() {

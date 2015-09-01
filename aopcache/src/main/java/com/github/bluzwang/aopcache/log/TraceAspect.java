@@ -43,6 +43,10 @@ public class TraceAspect {
         if (!trace.enable()) {
             return joinPoint.proceed();
         }
+        if (returnType != Observable.class) {
+            Log.w("aop-cache", "!!! return type must be Observable<>, do not know about it? Google rxjava!");
+            return joinPoint.proceed();
+        }
         String className = methodSignature.getDeclaringType().getSimpleName();
         String methodName = methodSignature.getName();
 
@@ -83,11 +87,11 @@ public class TraceAspect {
      * @param methodDuration Duration of the method in milliseconds.
      * @return A string representing message.
      */
-    private static String buildLogMessage(String className, String methodName, long methodDuration, String[] parameterNames, Object[] args, Class returnType, Object returnValue) {
+    static String buildLogMessage(String className, String methodName, long methodDuration, String[] parameterNames, Object[] args, Class returnType, Object returnValue) {
         StringBuilder message = new StringBuilder();
-        message.append("\nLog\n")
+        message.append("\naop-cache\n")
                 .append(TextUtils.isEmpty(className) ? "NO CLASS NAME!" : className)
-                .append("\n -->")
+                .append("\n ==> ")
                 .append(methodName)
                 .append(" (");
         for (int i = 0; i < parameterNames.length; i++) {
@@ -97,7 +101,7 @@ public class TraceAspect {
             }
         }
         message.append(")")
-                .append("\n <--")
+                .append("\n <== ")
                 .append(methodName)
                 .append(" [")
                 .append(methodDuration)
