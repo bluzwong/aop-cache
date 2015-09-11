@@ -139,7 +139,7 @@ public class CacheAspect {
                         long now = System.currentTimeMillis();
                         if (needDbCache && Paper.exist(key)) {
                             CacheObject cacheObject = Paper.get(key);
-                            if (cacheObject.getTimeout() > now || cacheObject.getTimeout() <= 0) {
+                            if (cacheObject.getObject() != null && (cacheObject.getTimeout() > now || cacheObject.getTimeout() <= 0)) {
                                 Object objFromDb = cacheObject.getObject();
                                 if (needMemCache) {
                                     repo.put(key, objFromDb, cacheObject.getTimeout(), 0);
@@ -175,7 +175,7 @@ public class CacheAspect {
                             }
                             if (needDbCache && Paper.exist(key)) {
                                 CacheObject cacheObject = Paper.get(key);
-                                if (cacheObject.getTimeout() > now) {
+                                if (cacheObject.getObject() !=null && cacheObject.getTimeout() > now) {
                                     aopLog(" hit in blocked database cache key:" + key +((level > 0)? "":  "  so return object:" + cachedValueAfterBlock), startTime);
                                     return cacheObject.getObject();
                                 }
@@ -186,11 +186,11 @@ public class CacheAspect {
                                 public void call(Object o) {
 //                      Log.d("bruce", "2 thread = " + Thread.currentThread().getName());
                                     newResponse[0] = o;
-                                    if (needMemCache) {
+                                    if (o != null && needMemCache) {
                                         repo.put(key, o, memTimeOut > 0 ? memTimeOut + System.currentTimeMillis() : Long.MAX_VALUE, 0);
                                         aopLog(" got new object save to memory cache key:" + key +((level > 0)? "":  "  object:" + o));
                                     }
-                                    if (needDbCache) {
+                                    if (o != null && needDbCache) {
                                         CacheObject cacheObject = new CacheObject();
                                         cacheObject.setObject(o);
                                         cacheObject.setTimeout(dbTimeOut > 0 ? dbTimeOut + System.currentTimeMillis() : Long.MAX_VALUE);
