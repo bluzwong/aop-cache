@@ -17,7 +17,7 @@ import java.lang.annotation.Target;
  * - Value (optional string parameter)
  *  debug trace for observable result
  */
-@Retention(RetentionPolicy.CLASS)
+@Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.CONSTRUCTOR, ElementType.METHOD })
 public @interface DebugTraceRx {
     int level() default 1;

@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
 /**
  * Created by wangzhijie@wind-mobi.com on 2015/8/27.
  */
-@Retention(RetentionPolicy.CLASS)
+@Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.METHOD })
 public @interface Cache {
      boolean needMemCache() default true;

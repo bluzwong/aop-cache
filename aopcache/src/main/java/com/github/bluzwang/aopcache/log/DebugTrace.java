@@ -16,7 +16,7 @@ import java.lang.annotation.Target;
  * - Total execution time
  * - Value (optional string parameter)
  */
-@Retention(RetentionPolicy.CLASS)
+@Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.CONSTRUCTOR, ElementType.METHOD })
 public @interface DebugTrace {
     int level() default 1;
