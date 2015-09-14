@@ -28,7 +28,7 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         // set context to use database cache
-        CacheUtil.setApplicationContext(this.getApplicationContext());
+        //CacheUtil.setApplicationContext(this.getApplicationContext());
         CacheUtil.setNeedLog(true);
 
         setContentView(R.layout.activity_main);

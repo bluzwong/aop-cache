@@ -150,7 +150,7 @@ public class CacheAspect {
                             } else {
                                 aopLog(" key:" + key + " in database is out of time");
                             }
-                        } else if (!Paper.exist(key)) {
+                        } else if (needDbCache && !Paper.exist(key)) {
                             aopLog(" key:" + key + " in database is missed");
                         }
                         final Block block;
