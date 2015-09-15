@@ -4,6 +4,7 @@ package com.github.bluzwang.aopcache.cache;
 /**
  * Created by Bruce-Home on 2015/8/30.
  */
+@Deprecated
 public class CacheObject {
 
     private Object object;

@@ -7,6 +7,7 @@ package com.github.bluzwang.aopcache.cache;
 
 import android.util.Log;
 import io.paperdb.Paper;
+import io.realm.Realm;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -20,6 +21,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -57,6 +59,7 @@ public class CacheAspect {
             }
         }
     }
+
     public static void aopLog(String msg) {
         aopLog(msg, -1);
     }
@@ -122,7 +125,7 @@ public class CacheAspect {
         final Object cachedValue = repo.get(key);
         if (cachedValue != null && needMemCache) {
             if (repo.getTimeOut(key) > System.currentTimeMillis() || repo.getTimeOut(key) <= 0) {
-                aopLog(" hit in memory cache key:" + key + ((level > 0)? "": "  so return object:" + cachedValue), startTime);
+                aopLog(" hit in memory cache key:" + key + ((level > 0) ? "" : "  so return object:" + cachedValue), startTime);
                 return Observable.just(cachedValue);
             } else {
                 aopLog(" key:" + key + " in memory is out of time");
@@ -136,21 +139,22 @@ public class CacheAspect {
                 .map(new Func1<Object, Object>() {
                     @Override
                     public Object call(Object o) {
-                        long now = System.currentTimeMillis();
-                        if (needDbCache && Paper.exist(key)) {
-                            CacheObject cacheObject = Paper.get(key);
-                            if (cacheObject.getObject() != null && (cacheObject.getTimeout() > now || cacheObject.getTimeout() <= 0)) {
-                                Object objFromDb = cacheObject.getObject();
-                                if (needMemCache) {
-                                    repo.put(key, objFromDb, cacheObject.getTimeout(), 0);
-                                    aopLog(" hit in database cache key:" + key + ((level > 0)? "": "  so save to memory object:" + cacheObject.getObject()));
-                                }
-                                aopLog(" hit in database cache key:" + key + ((level > 0)? "": "  so return object:" + cacheObject.getObject()), startTime);
-                                return objFromDb;
-                            } else {
-                                aopLog(" key:" + key + " in database is out of time");
+                        final long now = System.currentTimeMillis();
+                        final Realm realm = Realm.getInstance(CacheUtil.getApplicationContext());
+                        CacheInfo cacheInfo = realm.where(CacheInfo.class)
+                                .equalTo("key", key)
+                                .greaterThan("expTime", now)
+                                .findFirst();
+                        if (needDbCache && cacheInfo != null && Paper.exist(cacheInfo.getObjGuid())) {
+                            Object objFromDb = Paper.get(cacheInfo.getObjGuid());
+                            if (needMemCache) {
+                                repo.put(key, objFromDb, cacheInfo.getExpTime(), 0);
+                                aopLog(" hit in database cache key:" + key + ((level > 0) ? "" : "  so save to memory object:" + objFromDb));
                             }
-                        } else if (needDbCache && !Paper.exist(key)) {
+                            aopLog(" hit in database cache key:" + key + ((level > 0) ? "" : "  so return object:" + objFromDb), startTime);
+                            realm.close();
+                            return objFromDb;
+                        } else {
                             aopLog(" key:" + key + " in database is missed");
                         }
                         final Block block;
@@ -168,17 +172,26 @@ public class CacheAspect {
                             Object cachedValueAfterBlock = repo.get(key);
                             if (needMemCache && cachedValueAfterBlock != null) {
                                 if (repo.getTimeOut(key) > now) {
-                                    aopLog(" hit in blocked memory cache key:" + key +((level > 0)? "":  "  so return object:" + cachedValueAfterBlock), startTime);
+                                    aopLog(" hit in blocked memory cache key:" + key + ((level > 0) ? "" : "  so return object:" + cachedValueAfterBlock), startTime);
+                                    realm.close();
                                     return cachedValueAfterBlock;
                                 }
                                 //Log.d(cachedValueAfterBlock + "", " after newRequestStarted return cached key:" + key + " value" + cachedValueAfterBlock);
                             }
-                            if (needDbCache && Paper.exist(key)) {
-                                CacheObject cacheObject = Paper.get(key);
-                                if (cacheObject.getObject() !=null && cacheObject.getTimeout() > now) {
-                                    aopLog(" hit in blocked database cache key:" + key +((level > 0)? "":  "  so return object:" + cachedValueAfterBlock), startTime);
-                                    return cacheObject.getObject();
+                            cacheInfo = realm.where(CacheInfo.class)
+                                    .equalTo("key", key)
+                                    .greaterThan("expTime", now)
+                                    .findFirst();
+
+                            if (needDbCache && cacheInfo != null && Paper.exist(cacheInfo.getObjGuid())) {
+                                Object objFromDb = Paper.get(cacheInfo.getObjGuid());
+                                if (needMemCache) {
+                                    repo.put(key, objFromDb, cacheInfo.getExpTime(), 0);
+                                    aopLog(" hit in database cache key:" + key + ((level > 0) ? "" : "  so save to memory object:" + objFromDb));
                                 }
+                                aopLog(" hit in blocked database cache key:" + key + ((level > 0) ? "" : "  so return object:" + cachedValueAfterBlock), startTime);
+                                realm.close();
+                                return objFromDb;
                             }
 
                             obResult.subscribe(new Action1<Object>() {
@@ -188,14 +201,26 @@ public class CacheAspect {
                                     newResponse[0] = o;
                                     if (o != null && needMemCache) {
                                         repo.put(key, o, memTimeOut > 0 ? memTimeOut + System.currentTimeMillis() : Long.MAX_VALUE, 0);
-                                        aopLog(" got new object save to memory cache key:" + key +((level > 0)? "":  "  object:" + o));
+                                        aopLog(" got new object save to memory cache key:" + key + ((level > 0) ? "" : "  object:" + o));
                                     }
                                     if (o != null && needDbCache) {
-                                        CacheObject cacheObject = new CacheObject();
-                                        cacheObject.setObject(o);
-                                        cacheObject.setTimeout(dbTimeOut > 0 ? dbTimeOut + System.currentTimeMillis() : Long.MAX_VALUE);
-                                        Paper.put(key, cacheObject);
-                                        aopLog(" got new object save to database cache key:" + key +((level > 0)? "":  "  object:" + o));
+                                        String guid = UUID.randomUUID().toString();
+                                        //CacheObject cacheObject = new CacheObject();
+                                        Realm realm = Realm.getInstance(CacheUtil.getApplicationContext());
+                                        realm.beginTransaction();
+                                        CacheInfo info;
+                                        info = realm.where(CacheInfo.class).equalTo("key", key).findFirst();
+                                        if (info == null) {
+                                            info = realm.createObject(CacheInfo.class);
+                                            info.setKey(key);
+                                        }
+                                        info.setEditTime(now);
+                                        info.setExpTime(dbTimeOut > 0 ? dbTimeOut + System.currentTimeMillis() : Long.MAX_VALUE);
+                                        info.setObjGuid(guid);
+                                        Paper.put(guid, o);
+                                        realm.commitTransaction();
+                                        realm.close();
+                                        aopLog(" got new object save to database cache key:" + key + ((level > 0) ? "" : "  object:" + o));
                                     }
                                     latch.countDown();
                                 }
@@ -207,7 +232,8 @@ public class CacheAspect {
                             e.printStackTrace();
                         }
 //                Log.d("bruce", "3 thread = " + Thread.currentThread().getName());
-                        aopLog(" got new object return it: " + key +((level > 0)? "":  " object:" + newResponse[0]), startTime);
+                        aopLog(" got new object return it: " + key + ((level > 0) ? "" : " object:" + newResponse[0]), startTime);
+                        realm.close();
                         return newResponse[0];
                     }
                 });

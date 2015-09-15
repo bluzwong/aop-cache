@@ -3,6 +3,8 @@ package com.github.bluzwang.aopcache.cache;
 import android.content.Context;
 import android.util.Log;
 import io.paperdb.Paper;
+import io.realm.Realm;
+import io.realm.RealmConfiguration;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,6 +24,7 @@ public class CacheUtil {
     public static void setApplicationContext(Context context) {
         sContext = context.getApplicationContext();
         Paper.init(sContext);
+//        Realm.setDefaultConfiguration(new RealmConfiguration.Builder(sContext).build());
     }
 
     private static boolean sNeedLog = false;

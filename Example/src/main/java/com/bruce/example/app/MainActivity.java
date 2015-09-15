@@ -68,7 +68,7 @@ public class MainActivity extends Activity {
      * @param i
      * @return
      */
-    @Cache(memTimeOutMs = 5000, dbTimeOutMs = 10000, logLevel = 1)
+    @Cache(memTimeOutMs = 5000, dbTimeOutMs = 10000, logLevel = 1, needMemCache = false)
     @DebugTraceRx
     @TellMeIfError(whenParamIndex = {0, 1}, maxVal = {2, 1}, minVal = {-1, 1})
     private Observable<String> getResult(int i, @Ignore int i2) {
