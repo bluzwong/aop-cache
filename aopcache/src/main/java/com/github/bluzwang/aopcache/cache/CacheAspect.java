@@ -178,6 +178,7 @@ public class CacheAspect {
                                 }
                                 //Log.d(cachedValueAfterBlock + "", " after newRequestStarted return cached key:" + key + " value" + cachedValueAfterBlock);
                             }
+                            realm.refresh();
                             cacheInfo = realm.where(CacheInfo.class)
                                     .equalTo("key", key)
                                     .greaterThan("expTime", now)
