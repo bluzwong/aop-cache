@@ -205,7 +205,7 @@ public class CacheAspect {
                                         aopLog(" got new object save to memory cache key:" + key + ((level > 0) ? "" : "  object:" + o));
                                     }
                                     if (o != null && needDbCache) {
-                                        String guid = UUID.randomUUID().toString();
+
                                         //CacheObject cacheObject = new CacheObject();
                                         Realm realm = Realm.getInstance(CacheUtil.getApplicationContext());
                                         realm.beginTransaction();
@@ -214,11 +214,12 @@ public class CacheAspect {
                                         if (info == null) {
                                             info = realm.createObject(CacheInfo.class);
                                             info.setKey(key);
+                                            String guid = UUID.randomUUID().toString();
+                                            info.setObjGuid(guid);
                                         }
                                         info.setEditTime(now);
                                         info.setExpTime(dbTimeOut > 0 ? dbTimeOut + System.currentTimeMillis() : Long.MAX_VALUE);
-                                        info.setObjGuid(guid);
-                                        Paper.put(guid, o);
+                                        Paper.put(info.getObjGuid(), o);
                                         realm.commitTransaction();
                                         realm.close();
                                         aopLog(" got new object save to database cache key:" + key + ((level > 0) ? "" : "  object:" + o));
