@@ -6,6 +6,7 @@ import io.paperdb.Paper;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -45,11 +46,28 @@ public class CacheUtil {
         Log.d("aop-cache", "memory cache has been cleared size = " + size);
     }
     public static void clearAllDatabaseCache() {
-        DefaultCacheMemoryHolder holder = DefaultCacheMemoryHolder.INSTANCE;
-        int size =holder.map.size();
-        holder.map.clear();
         //holder.timeOutMap.clear();
-        Log.d("aop-cache", "memory cache has been cleared size = " + size);
+        Realm realm = Realm.getInstance(sContext);
+        realm.clear(CacheInfo.class);
+        realm.close();
+        Log.d("aop-cache", "database cache has been cleared ");
+    }
+
+    public static void removeDataBaseCache(String classMethodString) {
+        Realm realm = Realm.getInstance(sContext);
+        CacheInfo info = realm.where(CacheInfo.class).equalTo("key", classMethodString).findFirst();
+        if (info != null) {
+            info.removeFromRealm();
+        }
+        realm.close();
+    }
+
+    public static void removeDataBaseCache(Class clz, Method method) {
+        removeDataBaseCache(clz, method);
+    }
+
+    public static void removeMemoryCache(Class clz, Method method) {
+        removeMemoryCache(getMethodName(clz, method));
     }
 
     public static void removeMemoryCache(String classMethodString) {
@@ -64,5 +82,11 @@ public class CacheUtil {
         for (Object o : removeList) {
             holder.map.remove(o);
         }
+    }
+
+    public static String getMethodName(Class clz, Method method) {
+        String clzName = clz.getName();
+        String methodName = method.getName();
+        return clzName + "." + methodName;
     }
 }
