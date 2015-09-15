@@ -41,14 +41,14 @@ public class CacheUtil {
         DefaultCacheMemoryHolder holder = DefaultCacheMemoryHolder.INSTANCE;
         int size =holder.map.size();
         holder.map.clear();
-        holder.timeOutMap.clear();
+        //holder.timeOutMap.clear();
         Log.d("aop-cache", "memory cache has been cleared size = " + size);
     }
     public static void clearAllDatabaseCache() {
         DefaultCacheMemoryHolder holder = DefaultCacheMemoryHolder.INSTANCE;
         int size =holder.map.size();
         holder.map.clear();
-        holder.timeOutMap.clear();
+        //holder.timeOutMap.clear();
         Log.d("aop-cache", "memory cache has been cleared size = " + size);
     }
 

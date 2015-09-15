@@ -1,6 +1,5 @@
 package com.github.bluzwang.aopcache.cache;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -8,25 +7,24 @@ import java.util.Map;
  */
 public enum DefaultCacheMemoryHolder implements ICacheHolder {
     INSTANCE;
-    public final Map<String, Object> map = new HashMap<String, Object>();
-    public final Map<String, Long> timeOutMap = new HashMap<String, Long>();
+    public final Map<String, ObjectAndTimeOut> map = new LruMap<String, ObjectAndTimeOut>(100, 0.75f, true);
+//    public final Map<String, Long> timeOutMap = new HashMap<String, Long>();
 
     @Override
     public void put(String key, Object value, long timeOutMs, long timeOutReturnInMs) {
-        map.put(key, value);
-        timeOutMap.put(key, timeOutMs);
+        map.put(key, new ObjectAndTimeOut(value, timeOutMs));
     }
 
     public Object get(String key) {
         if (!map.containsKey(key)) {
             return null;
         }
-        return map.get(key);
+        return map.get(key).obj;
     }
     public long getTimeOut(String key) {
-        if (!timeOutMap.containsKey(key)) {
+        if (!map.containsKey(key)) {
             return 0;
         }
-        return timeOutMap.get(key);
+        return map.get(key).timeOut;
     }
 }
