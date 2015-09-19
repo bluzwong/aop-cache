@@ -13,8 +13,11 @@
         <option name="ASSEMBLE_TASK_NAME" value="assembleDebug" />
         <option name="COMPILE_JAVA_TASK_NAME" value="compileDebugSources" />
         <option name="ASSEMBLE_TEST_TASK_NAME" value="assembleDebugAndroidTest" />
-        <option name="SOURCE_GEN_TASK_NAME" value="generateDebugSources" />
-        <option name="TEST_SOURCE_GEN_TASK_NAME" value="generateDebugAndroidTestSources" />
+        <option name="COMPILE_JAVA_TEST_TASK_NAME" value="compileDebugAndroidTestSources" />
+        <afterSyncTasks>
+          <task>generateDebugAndroidTestSources</task>
+          <task>generateDebugSources</task>
+        </afterSyncTasks>
         <option name="ALLOW_USER_CONFIGURATION" value="false" />
         <option name="MANIFEST_FILE_RELATIVE_PATH" value="/src/main/AndroidManifest.xml" />
         <option name="RES_FOLDER_RELATIVE_PATH" value="/src/main/res" />
@@ -62,6 +65,7 @@
       <sourceFolder url="file://$MODULE_DIR$/src/androidTest/java" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/src/androidTest/jni" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/src/androidTest/rs" isTestSource="true" />
+      <excludeFolder url="file://$MODULE_DIR$/build/docs" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/assets" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/bundles" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/classes" />
@@ -69,6 +73,7 @@
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/dependency-cache" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/dex" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/dex-cache" />
+      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/io.paperdb/paperdb/0.9/jars" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/incremental" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/jacoco" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/javaResources" />
@@ -81,20 +86,22 @@
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/res" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/rs" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/symbols" />
+      <excludeFolder url="file://$MODULE_DIR$/build/libs" />
       <excludeFolder url="file://$MODULE_DIR$/build/outputs" />
+      <excludeFolder url="file://$MODULE_DIR$/build/poms" />
       <excludeFolder url="file://$MODULE_DIR$/build/tmp" />
     </content>
     <orderEntry type="jdk" jdkName="Android API 22 Platform" jdkType="Android SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" exported="" name="aspectjrt-1.8.1" level="project" />
     <orderEntry type="library" exported="" name="protobuf-java-2.6.1" level="project" />
+    <orderEntry type="library" exported="" name="realm-android-0.82.2" level="project" />
     <orderEntry type="library" exported="" name="kryo-3.0.1" level="project" />
-    <orderEntry type="library" exported="" name="rxjava-1.0.14" level="project" />
     <orderEntry type="library" exported="" name="reflectasm-1.10.1" level="project" />
+    <orderEntry type="library" exported="" name="rxjava-1.0.14" level="project" />
     <orderEntry type="library" exported="" name="paperdb-0.9" level="project" />
     <orderEntry type="library" exported="" name="kryo-serializers-0.30" level="project" />
     <orderEntry type="library" exported="" name="minlog-1.3.0" level="project" />
-    <orderEntry type="library" exported="" name="realm-android-0.81.1" level="project" />
     <orderEntry type="library" exported="" name="asm-5.0.3" level="project" />
     <orderEntry type="library" exported="" name="objenesis-2.1" level="project" />
   </component>
